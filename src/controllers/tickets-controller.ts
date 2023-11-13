@@ -13,3 +13,12 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
   const tickets = await ticketsService.getTickets(userId);
   res.status(httpStatus.OK).send(tickets);
 }
+
+export async function postTickets(req: AuthenticatedRequest, res: Response) {
+  const { ticketTypeId } = req.body;
+  const { userId } = req;
+
+  const ticket = await ticketsService.postTickets(ticketTypeId, userId);
+
+  res.status(httpStatus.CREATED).send(ticket);
+}
