@@ -1,44 +1,38 @@
-import { invalidDataError, notFoundError } from '@/errors';
-import { CreateTicket } from '@/protocols';
-import { enrollmentRepository, ticketsRepository } from '@/repositories';
+import { notFoundError } from "@/errors";
+import { CreateTicketParams } from "@/protocols";
+import { enrollmentRepository, ticketsRepository } from "@/repositories"
 
 async function getTicketTypes() {
-  const ticketTypes = await ticketsRepository.findTicketTypes();
-
-  return ticketTypes;
+    const ticketTypes = await ticketsRepository.findTicketTypes()
+    return ticketTypes;
 }
 
-async function getTickets(userId: number) {
-  const enrollmentInfo = await enrollmentRepository.findWithAddressByUserId(userId);
-  if (!enrollmentInfo) throw notFoundError();
+async function getTicketByUserId(userId: number) {
+    const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+    if (!enrollment) throw notFoundError();
 
-  const tickets = await ticketsRepository.findTickets(enrollmentInfo.id);
-  if (!tickets) throw notFoundError();
+    const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+    if (!ticket) throw notFoundError();
 
-  return tickets;
+    return ticket;
 }
 
-async function postTickets(ticketTypeId: number, userId: number) {
-  const enrollmentInfo = await enrollmentRepository.findWithAddressByUserId(userId);
-  if (!enrollmentInfo) throw notFoundError();
+async function createTicket(userId: number, ticketTypeId: number) {
+    const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+    if (!enrollment) throw notFoundError();
 
-  const enrollmentId = enrollmentInfo.id;
+    const ticketData: CreateTicketParams = {
+        ticketTypeId,
+        enrollmentId: enrollment.id,
+        status: 'RESERVED'
+    }
 
-  if (!ticketTypeId) throw invalidDataError('ticketTypeId');
-
-  const ticketInfo: CreateTicket = {
-    enrollmentId,
-    ticketTypeId,
-    status: 'RESERVED',
-  };
-
-  const ticketCreated = await ticketsRepository.createTickets(ticketInfo);
-
-  return ticketCreated;
+    const ticket = await ticketsRepository.createTicket(ticketData)
+    return ticket
 }
 
 export const ticketsService = {
-  getTicketTypes,
-  getTickets,
-  postTickets,
-};
+    getTicketByUserId,
+    getTicketTypes,
+    createTicket
+}
