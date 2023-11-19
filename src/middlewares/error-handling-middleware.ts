@@ -50,6 +50,12 @@ export function handleApplicationErrors(
     });
   }
 
+  if (err.name === 'InvalidHotelError') {
+    return res.status(httpStatus.PAYMENT_REQUIRED).send({
+      message: err.message,
+    });
+  }
+
   if (err.hasOwnProperty('status') && err.name === 'RequestError') {
     return res.status((err as RequestError).status).send({
       message: err.message,
