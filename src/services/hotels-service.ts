@@ -9,7 +9,7 @@ async function validateUserInfo(userId: number) {
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
   if (!ticket) throw notFoundError();
 
-  if (ticket.status === TicketStatus.RESERVED || ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
+  if (ticket.status === TicketStatus.RESERVED || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote) {
     throw invalidHotelError();
   }
 }
