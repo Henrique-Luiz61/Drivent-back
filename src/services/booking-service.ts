@@ -34,8 +34,23 @@ async function getBooking(userId: number) {
   return booking;
 }
 
-async function updateBooking() {
-  return;
+async function updateBooking(userId: number, roomId: number, bookingId: string) {
+  const idBooking = Number(bookingId);
+  if (isNaN(idBooking)) throw invalidDataError('bookingId');
+
+  const room = await roomRepository.findRoomById(roomId);
+  if (!room) throw notFoundError();
+
+  const countBooking = await bookingRepository.findAllCountBooking(roomId);
+  if (countBooking >= room.capacity) throw invalidBookingError();
+
+  const booking = await bookingRepository.findBookingByUserId(userId);
+  if (!booking) throw invalidBookingError();
+
+  const updatedBooking = await bookingRepository.upsertByBookingId(idBooking, roomId);
+  if (!updatedBooking) throw invalidBookingError();
+
+  return updatedBooking;
 }
 
 export const bookingService = {
